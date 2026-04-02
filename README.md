@@ -307,12 +307,9 @@ Internally, these settings are stored in a structured format (the specific seria
 
 | Term | Definition |
 |---|---|
-| **LSL** | Lab Streaming Lay:er a protocol and library for synchronized streaming of time-series data in research settings |
-| **XDF** | Extensible Data Form:at the native file format for LSL recordings |
-| **ETL** | Extract, Transform, Lo:ad the data processing pipeline pattern |
-| **EDA / GSR** | Electrodermal Activity / Galvanic Skin Response |
-| **HRV** | Heart Rate Variability |
-| **PERCLOS** | Percentage of Eye Closu:re a drowsiness metric from eye tracking |
+| **LSL** | Lab Streaming Layer; a protocol and library for synchronized streaming of time-series data in research settings |
+| **XDF** | Extensible Data Format; the native file format for LSL recordings |
+| **ETL** | Extract, Transform, Load; the data processing pipeline pattern |
 | **UAS** | Unmanned Aircraft System |
 | **UH-60** | Black Hawk utility helicopter |
 | **USAARL** | United States Army Aeromedical Research Laboratory |
