@@ -51,7 +51,7 @@ The system is organized into three layers:
 
 ## Directory Structure
 
-'''
+```
 echo/
 ├── README.md
 │
@@ -82,8 +82,8 @@ echo/
 │       └── training/            # training environment
 │
 └──configs/                      # saved session configurations
+```
 
-'''
 ---
 
 ## Data Layer
