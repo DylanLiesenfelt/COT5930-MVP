@@ -161,7 +161,8 @@ class PhysicalSensor(Sensor):
     def connect(self):
         """
         Connect to the physical device and prepare for streaming.
-        This gets called once when the sensor starts. Do any setup work here (e.g. open serial port, connect to API, etc).
+        This gets called once when the sensor starts. 
+        Do any setup work here (e.g. open serial port, connect to API, etc).
         """
         ...
 
@@ -319,7 +320,35 @@ class DerivedSensor(Sensor):
 # ════════════════════════════════════════════════════════════════════
 @dataclass
 class DummySensor(Sensor):
-   pass
+    """
+    Base class for fake/test sensors that generate synthetic data.
+ 
+    Use this to test your pipeline, build frontend components, or troubleshoot
+    without needing real hardware. Subclass this and implement generate_sample()
+    to produce whatever fake data you need.
+ 
+    There is no device to connect to. The sensor just generates data and
+    pushes it at the declared sample rate.
+    """
+ 
+    @abstractmethod
+    def generate_sample(self) -> list[float]:
+        """
+        Generate one fake sample.
+        Return a list of floats (one per channel).
+        This should always return data — dummy sensors never have "no data available".
+        """
+        ...
+ 
+    # Base class hooks
+    def _setup(self):
+        print(f"[{self.name}] Starting dummy sensor...")
+ 
+    def _loop_body(self):
+        sample = self.generate_sample()
+        self.push(sample)
+        if self.sample_rate > 0:
+            time.sleep(1.0 / self.sample_rate)
 
 
 # ════════════════════════════════════════════════════════════════════

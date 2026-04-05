@@ -28,6 +28,8 @@ A dummy sensor generates fake data. Use it to test the pipeline, build frontend 
 2. Rename the file and the class to match what you're faking (e.g. `fake_ecg.py`, `class FakeECG`)
 3. Fill in `generate_sample()` — return a list of fake numbers, one per channel
 
+That's it. The base class handles everything else.
+
 ### Example — Fake ECG
 
 ```python
