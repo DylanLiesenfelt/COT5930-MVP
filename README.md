@@ -1,4 +1,5 @@
 # ECHO: Enhanced Cognitive Human Operations
+```
 ╭───────────────────────────────────────────────────────────╮
 │                                                           │
 │  ███████╗  ██████╗ ██╗  ██╗  ██████╗                      │
@@ -11,7 +12,7 @@
 │              USAARL || FAU                                │
 │                                                           │
 ╰───────────────────────────────────────────────────────────╯
-
+```
 **Version:** 0.1.0 — Backend Prototype  
 **Date:** 04/05/2026
 **Facilatator:** US Army Aeromedical Research Lab (USAARL) || Operator State Monitoring Team (OSM)
