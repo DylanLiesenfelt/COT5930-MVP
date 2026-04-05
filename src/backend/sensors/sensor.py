@@ -21,6 +21,10 @@ from pylsl import StreamInfo, StreamOutlet, StreamInlet, resolve_stream
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 
+# ════════════════════════════════════════════════════════════════════
+# BASE SENSOR - ABSTRACT CLASS THAT WRAPS ANY SENSOR INTO AN LSL OUTLET
+# ════════════════════════════════════════════════════════════════════
+
 @dataclass
 class Sensor(ABC):
     """
@@ -56,7 +60,10 @@ class Sensor(ABC):
         if self.channels < 1:
             raise ValueError("There must be at least 1 channel for a signal")
 
-        if self.sample_rate < 1: # <- TODO: Ask Dr.Vogl pref on bare min sample rate
+        if self.sample_rate < 1: # TODO: Ask Dr.Vogl pref on bare min sample rate
+                                 # NOTE: May want to allow 0 for derived sensors that only update on new source data,
+                                 # Specifically for implementing sub-class for classification models that have binary output, 
+                                 # continuous output not needed and would just be 0 eatting CPU for no reason.
             raise ValueError("Sample Rate must be at least 1") 
 
         if self.channel_labels is None:
@@ -145,6 +152,7 @@ class Sensor(ABC):
 # PHYSICAL SENSOR - FOR UNSUPPORTED DEVICES THAT REQUIRE A DRIVER/SDK/API CONNECTION
 # ════════════════════════════════════════════════════════════════════
 
+@dataclass
 class PhysicalSensor(Sensor):
     """
     Base class for physical sensors that require a connection to an external device or API.
@@ -195,15 +203,19 @@ class PhysicalSensor(Sensor):
 @dataclass
 class DerivedSensor(Sensor):
     """
-    Base class for derived sensors that compute metrics from one or more raw sensor streams.
+    Base class for derived sensors that compute metrics from raw sensor data.
 
-    Subclass this and implement the process method to create a new derived metric.
-    The processor maintains a rolling buffer of incoming samples from the source stream.
-    Every process_interval seconds, it calls your process() with the current buffer.
-
-    Your process() returns either:
-      - a single sample: list[float]         → pushed as one sample
-      - None                                 → nothing to push yet
+    This is for sensors that don't connect to a physical device, 
+    but instead compute some derived metric from one or more source LSL streams.
+    This is done so that the derived metrics can also be recorded by LSL 
+    and be treated uniformly by the frontend. 
+   
+    The base class handles connecting to the source stream(s) and buffering the raw data,
+    while the subclass just implements the logic for computing the derived metric from the raw data.
+    
+    The source stream(s) are specified by the source_name and source_type fields,
+    and the base class will automatically resolve the stream, connect to it, 
+    and buffer the incoming data.        
     """
     source_name: str = ""
     source_type: str = ""
@@ -300,3 +312,30 @@ class DerivedSensor(Sensor):
     def _teardown(self):
         if self._inlet:
             self._inlet.close_stream()
+
+
+# ════════════════════════════════════════════════════════════════════
+# DUMMY SENSOR - FOR TESTING AND PLACEHOLDING
+# ════════════════════════════════════════════════════════════════════
+@dataclass
+class DummySensor(Sensor):
+   pass
+
+
+# ════════════════════════════════════════════════════════════════════
+# MACHINE LEARNING SENSOR - DERIVED SENSOR THAT APPLIES A PRE-TRAINED MODEL TO THE BUFFER
+# ════════════════════════════════════════════════════════════════════
+@dataclass
+class MLSensor(DerivedSensor):
+    # TODO: Implement a base class for ML-based derived sensors
+    #  that load a pre-trained model and apply it to the buffer.
+    pass
+
+class RegressionSensor(MLSensor):
+    # TODO: Implement a base class for regression models that output continuous values.
+    pass
+
+class ClassificationSensor(MLSensor):
+    # TODO: Implement a base class for classification models that 
+    # output discrete labels or probabilities.
+    pass
