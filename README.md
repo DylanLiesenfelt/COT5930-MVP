@@ -13,9 +13,12 @@
 │                                                           │
 ╰───────────────────────────────────────────────────────────╯
 ```
-**Version:** 0.1.0 — Backend Prototype  
+**Version:** 0.1.0 — LSL Streaming Prototype  
+
 **Date:** 04/05/2026
+
 **Facilatator:** US Army Aeromedical Research Lab (USAARL) || Operator State Monitoring Team (OSM)
+
 **Developer:** Florida Atlantic University (FAU) || Hacking for Defense Program (H4D) 
 
 ---
@@ -38,7 +41,7 @@ ECHO is a real-time platform for monitoring the cognitive state of operators. It
 
 The end goal of this platform is to provide the means to develop the groundwork for systems that aim to enhance operator state management, monitoring, prediction, and support.
 
-The current release is a **backend skeleton** — a working FastAPI server that acts as the session manager for research recordings via LSL, a sensor abstraction layer for standardized sensor development and integration, and WebSocket streaming for frontend visualization. The frontend is not yet implemented. It is planned to be developed with React.js using Tailwind.css and packaged with Electron.js for desktop use.
+The current release is a barebones **LSL Streaming Prototype** — a working FastAPI server that acts as the session manager for research recordings via LSL, a sensor abstraction layer for standardized sensor development and integration, and WebSocket streaming for frontend visualization. The frontend is not yet implemented. It is planned to be developed with React.js using Tailwind.css and packaged with Electron.js for desktop use.
 
 ---
 
