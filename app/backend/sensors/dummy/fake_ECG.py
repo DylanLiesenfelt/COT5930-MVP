@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from sensors.sensor import DummySensor
+from app.backend.sensors.sensor import DummySensor
 
 import random
 import numpy as np

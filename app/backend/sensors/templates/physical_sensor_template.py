@@ -7,7 +7,7 @@ for your device's protocol.
 """
 
 from dataclasses import dataclass
-from sensors.sensor import PhysicalSensor
+from app.backend.sensors.sensor import PhysicalSensor
 
 
 @dataclass

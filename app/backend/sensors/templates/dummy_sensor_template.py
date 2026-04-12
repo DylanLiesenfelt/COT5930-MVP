@@ -6,7 +6,7 @@ Rename the class, then fill in generate_sample() with your fake data.
 """
 
 from dataclasses import dataclass
-from sensors.sensor import DummySensor
+from app.backend.sensors.sensor import DummySensor
 
 
 @dataclass

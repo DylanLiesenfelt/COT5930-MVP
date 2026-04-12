@@ -7,7 +7,7 @@ Rename the class, then fill in process() with your computation.
 
 import numpy as np
 from dataclasses import dataclass
-from sensors.sensor import DerivedSensor
+from app.backend.sensors.sensor import DerivedSensor
 
 
 @dataclass
