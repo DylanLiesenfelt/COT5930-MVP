@@ -8,12 +8,12 @@ import Data from './assets/views/Data';
 const App = () => {
   return (
     <HashRouter>
-      <div className="flex h-screen">
+      <div className="flex h-screen bg-gray-50">
         <div className="flex-1 overflow-y-auto">
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/settings" element={<Settings />} />
-            <Route path="/machine-learning" element={<MachineLearning />} />
+            <Route path="/ml" element={<MachineLearning />} />
             <Route path="/data" element={<Data />} />
           </Routes>
         </div>
