@@ -11,7 +11,7 @@ Requires a running LSL stream of type "EEG" as its source.
 import numpy as np
 from scipy.signal import welch
 from dataclasses import dataclass
-from app.backend.sensors.sensor import DerivedSensor
+from sensors.sensor import DerivedSensor
 
 
 @dataclass
