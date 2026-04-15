@@ -4,6 +4,9 @@ import Dashboard from './assets/views/Dashboard';
 import Settings from './assets/views/Settings';
 import MachineLearning from './assets/views/MachineLearning';
 import Data from './assets/views/Data';
+import React, { Component } from "react";
+
+
 
 const App = () => {
   return (

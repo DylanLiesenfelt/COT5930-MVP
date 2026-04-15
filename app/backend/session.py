@@ -12,6 +12,9 @@ and broadcast to WebSocket clients.
 
 import asyncio
 import json
+import openpyxl
+import pandas as pd
+from pathlib import Path
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
@@ -20,6 +23,22 @@ from pylsl import StreamInlet, resolve_streams
 
 inlets: list[dict] = []  # {"name": str, "type": str, "inlet": StreamInlet}
 clients: list[WebSocket] = []
+cols = ['TimeStamp', 'StreamName', 'data']
+wb = openpyxl.Workbook()
+wb.active.append(cols)
+
+def create_path():
+    script_dir = Path(__file__).parent
+    path = script_dir / 'CSV'
+    return str(path)
+
+
+def Excel_payload(timestamp,streamname, data ):
+    wb.active.append([timestamp, streamname, data])
+    last_row = wb.active.max_row
+    wb.active.cell(row=last_row, column=3).number_format = '0.000000'
+    wb.save(create_path() + '/data3.xlsx')
+    return
 
 def discover_streams(timeout: float = 3.0) -> list[dict]:
     """
@@ -84,6 +103,7 @@ async def read_lsl_loop(update_rate: float = 250.0):
             # pull_sample with timeout=0.0 is non-blocking
             sample, timestamp = inlet.pull_sample(timeout=0.0)
             if sample is not None:
+                Excel_payload(timestamp, stream["name"], sample[0])
                 payload = json.dumps({
                     "stream": stream["name"],
                     "type": stream["type"],

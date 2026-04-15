@@ -2,7 +2,8 @@ const Data = () => {
   return (
     <>  
     <div>
-        <p>Data</p>
+        <button> File Upload</button>
+        
     </div>
     </>
   );
