@@ -18,6 +18,7 @@ from pathlib import Path
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi.middleware.cors import CORSMiddleware
 from pylsl import StreamInlet, resolve_streams
 
 inlets: list[dict] = []  # {"name": str, "type": str, "inlet": StreamInlet}
@@ -55,14 +56,30 @@ def discover_streams(timeout: float = 3.0) -> list[dict]:
     for info in found:
         inlet = StreamInlet(info, max_buflen=1)
         inlet.open_stream()
+
+        # Extract channel labels from LSL description XML
+        channel_labels = []
+        ch = info.desc().child("channels").child("channel")
+        while not ch.empty():
+            label = ch.child_value("label")
+            if label:
+                channel_labels.append(label)
+            ch = ch.next_sibling()
+
+        # Fallback if no labels were set
+        if len(channel_labels) != info.channel_count():
+            channel_labels = [f"Channel {i+1}" for i in range(info.channel_count())]
+
         result.append({
             "name": info.name(),
             "type": info.type(),
             "channels": info.channel_count(),
             "rate": info.nominal_srate(),
+            "channel_labels": channel_labels,
             "inlet": inlet,
         })
         print(f"\n SIG: {info.name()} | {info.type()} | {info.channel_count()}ch @ {info.nominal_srate()}Hz")
+        print(f"     Labels: {channel_labels}")
 
     return result
 
@@ -113,7 +130,12 @@ async def read_lsl_loop(update_rate: float = 250.0):
 async def lifespan(app: FastAPI):
     global inlets
     inlets = discover_streams(timeout=3.0)
-    task = asyncio.create_task(read_lsl_loop())
+
+    # Auto-detect: use the highest sample rate as the update rate
+    max_rate = max((s["rate"] for s in inlets), default=250.0)
+    print(f"\n Session update rate: {max_rate} Hz (matched to fastest stream)")
+
+    task = asyncio.create_task(read_lsl_loop(update_rate=max_rate))
     yield
     task.cancel()
     for stream in inlets:
@@ -121,6 +143,13 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 # ════════════════════════════════════════════════════════════════════
@@ -141,9 +170,35 @@ def list_streams():
             "type": s["type"],
             "channels": s["channels"],
             "rate": s["rate"],
+            "channel_labels": s["channel_labels"],
         }
         for s in inlets
     ]
+
+
+@app.post("/refresh")
+def refresh_streams():
+    """
+    Re-scan the network for LSL streams.
+    Closes existing inlets and creates new ones for any streams found.
+    The read loop automatically picks up the new inlets.
+    """
+    global inlets
+
+    # Close existing inlets
+    for stream in inlets:
+        try:
+            stream["inlet"].close_stream()
+        except Exception:
+            pass
+
+    # Re-discover
+    inlets = discover_streams(timeout=3.0)
+
+    max_rate = max((s["rate"] for s in inlets), default=250.0)
+    print(f"\n Refreshed — {len(inlets)} stream(s), update rate: {max_rate} Hz")
+
+    return list_streams()
 
 # ════════════════════════════════════════════════════════════════════
 # WEBSOCKET ENDPOINT

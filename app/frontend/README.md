@@ -1,3 +1,0 @@
-# ECHO Frontend
-
-Placeholder
