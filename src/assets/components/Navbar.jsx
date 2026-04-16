@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom';
+import BackendTerminal from './BackendTerminal';
 
-const Navbar = () => {
+const Navbar = ({ devMode }) => {
   const linkClass = ({ isActive }) =>
     `w-full px-4 py-3 text-sm rounded-lg transition-colors font-medium ${
       isActive
@@ -22,6 +23,12 @@ const Navbar = () => {
         <NavLink to="/data" className={linkClass}>Data</NavLink>
       </div>
 
+      {devMode && (
+        <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-slate-700/50">
+          <BackendTerminal />
+        </div>
+      )}
+      
       <div className="flex flex-col gap-1 mt-auto">
         <NavLink to="/settings" className={linkClass}>Settings</NavLink>
       </div>
