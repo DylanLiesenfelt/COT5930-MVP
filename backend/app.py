@@ -18,7 +18,6 @@ session = SessionManager()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    session.start()
     yield
     await session.stop()
 
@@ -46,6 +45,21 @@ async def root():
 @app.get("/health")
 async def health():
     return {"status": "ok", "session": session.status}
+
+# ════════════════════════════════════════════════════════════════════
+# SESSION
+# ════════════════════════════════════════════════════════════════════
+@app.post("/session/start")
+async def start_session():
+    if session.status == "Online":
+        return {"ok": True, "status": session.status}
+    session.start()
+    return {"ok": True, "status": session.status}
+
+@app.post("/session/stop")
+async def stop_session():
+    await session.stop()
+    return {"ok": True, "status": session.status}
 
 # ════════════════════════════════════════════════════════════════════
 # STREAMS
