@@ -7,15 +7,12 @@ export const useDashboardSession = ({ connectWs, disconnectWs, setBackendLogs })
   const startSession = useCallback(async () => {
     if (!window.echo) return;
     setSessionStarting(true);
-    setBackendLogs([]);
 
     const result = await window.echo.startSession();
     if (result.ok) {
       setSessionRunning(true);
-      setTimeout(() => {
-        connectWs();
-        setSessionStarting(false);
-      }, 2500);
+      connectWs();
+      setSessionStarting(false);
     } else {
       setSessionStarting(false);
       setBackendLogs((prev) => [...prev, `Error: ${result.error}`]);

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { SIGNAL_COLORS } from './DashboardMonitor';
+import { SIGNAL_COLORS } from './constants';
 import DashboardHeader from './DashboardHeader';
 import DashboardGrid from './DashboardGrid';
 import DashboardFooter from './DashboardFooter';
@@ -44,14 +44,7 @@ const Dashboard = () => {
     setMonitors((prev) => prev.filter((m) => m.id !== id));
 
   return (
-    <div style={{
-      width: '100%', height: '100vh',
-      background: '#f1f5f9',
-      display: 'flex', flexDirection: 'column',
-      fontFamily: 'Lexend, sans-serif',
-      color: '#1e293b',
-      overflow: 'hidden',
-    }}>
+    <div className="w-full h-screen bg-slate-100 flex flex-col overflow-hidden">
       <style>{`
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }

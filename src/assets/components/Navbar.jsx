@@ -1,6 +1,5 @@
 import { NavLink } from 'react-router-dom';
 import BackendConsole from './BackendConsole';
-import FrontendConsole from './FrontendConsole';
 import { useDevMode } from '../context/DevModeContext';
 
 const Navbar = () => {
@@ -31,7 +30,6 @@ const Navbar = () => {
       {devMode ? (
         <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-slate-700/50 flex-1 min-h-0">
           <BackendConsole />
-          <FrontendConsole />
         </div>
       ) : (
         <div className="flex-1 min-h-0" />

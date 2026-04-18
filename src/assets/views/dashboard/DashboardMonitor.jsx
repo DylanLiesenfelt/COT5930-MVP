@@ -1,16 +1,8 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-
-export const SIGNAL_COLORS = [
-  '#2563eb', '#07dd96', '#ef4444', '#f5e50b',
-  '#8b5cf6', '#59dff7', '#ec4899', '#8de40a',
-  '#ff6a00', '#4f9bf1', '#14b8a6', '#e11d48',
-];
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { SIGNAL_COLORS } from './constants';
 
 const MIN_W = 200;
 const MIN_H = 180;
-
-let _id = 0;
-const uid = () => `mon_${++_id}_${Date.now()}`;
 
 
 const SignalCanvas = ({ channels, width, height, maxPoints = 500 }) => {
@@ -296,14 +288,12 @@ const MonitorPanel = ({ id, streams, dataRef, onRemove, defaultColor }) => {
 
   const streamInfo = streams.find((s) => s.name === selectedStream);
   const numChannels = streamInfo ? streamInfo.channels : 0;
-  const channelLabels = streamInfo?.channel_labels || [];
+  const channelLabels = useMemo(() => streamInfo?.channel_labels || [], [streamInfo]);
   const maxPoints = streamInfo ? Math.ceil(streamInfo.rate * DISPLAY_SECONDS) : 500;
 
   useEffect(() => {
     buffersRef.current = Array.from({ length: numChannels }, () => []);
     cursorRef.current = 0;
-    setChannelData([]);
-    setChannelView(-1);
   }, [selectedStream, numChannels]);
 
   useEffect(() => {
@@ -314,7 +304,7 @@ const MonitorPanel = ({ id, streams, dataRef, onRemove, defaultColor }) => {
       if (!incoming || incoming.length === 0) return;
 
       if (cursorRef.current > incoming.length) {
-        cursorRef.current = incoming.length;
+        cursorRef.current = Math.max(0, incoming.length - maxPoints);
       }
 
       const start = cursorRef.current;
@@ -343,7 +333,7 @@ const MonitorPanel = ({ id, streams, dataRef, onRemove, defaultColor }) => {
 
       setChannelData(visible.map((i) => ({
         label: channelLabels[i] || `Channel ${i + 1}`,
-          color: visible.length === 1 ? color : SIGNAL_COLORS[i % SIGNAL_COLORS.length],
+        color: visible.length === 1 ? color : SIGNAL_COLORS[i % SIGNAL_COLORS.length],
         data: [...(buffersRef.current[i] || [])],
       })));
     }, 33);
@@ -359,10 +349,6 @@ const MonitorPanel = ({ id, streams, dataRef, onRemove, defaultColor }) => {
   }, []);
 
   const canvasH = size.h - 88;
-
-  const singleVal = channelData.length === 1 && channelData[0].data.length > 0
-    ? channelData[0].data[channelData[0].data.length - 1].toFixed(3)
-    : null;
 
   return (
     <div
@@ -388,7 +374,7 @@ const MonitorPanel = ({ id, streams, dataRef, onRemove, defaultColor }) => {
       }}>
         <select
           value={selectedStream}
-          onChange={(e) => setSelectedStream(e.target.value)}
+          onChange={(e) => { setSelectedStream(e.target.value); setChannelView(-1); setChannelData([]); }}
           style={{
             flex: 1, background: '#ffffff', color: '#1e293b',
             border: '1px solid #cbd5e1', borderRadius: 6,
@@ -466,7 +452,6 @@ const MonitorPanel = ({ id, streams, dataRef, onRemove, defaultColor }) => {
         <span>{selectedStream || '—'}</span>
         <span style={{ textAlign: 'right' }}>
           {streamInfo ? `${streamInfo.channels}ch · ${streamInfo.rate}Hz` : ''}
-          {singleVal ? ` · ${singleVal}` : ''}
         </span>
       </div>
 

@@ -8,15 +8,23 @@ export const DevModeProvider = ({ children }) => {
   const listenerAttached = useRef(false);
 
   useEffect(() => {
-    if (!window.echo || listenerAttached.current) return;
-    listenerAttached.current = true;
-
-    window.echo.onBackendLog((msg) => {
-      setBackendLogs((prev) => {
-        const next = [...prev, msg.trim()];
-        return next.length > 500 ? next.slice(-500) : next;
+    // window.echo is injected by Electron's preload; retry once if not yet ready
+    const attach = () => {
+      if (listenerAttached.current || !window.echo) return false;
+      listenerAttached.current = true;
+      window.echo.onBackendLog((line) => {
+        setBackendLogs((prev) => {
+          const next = [...prev, line.trim()];
+          return next.length > 500 ? next.slice(-500) : next;
+        });
       });
-    });
+      return true;
+    };
+
+    if (!attach()) {
+      const t = setTimeout(attach, 500);
+      return () => clearTimeout(t);
+    }
   }, []);
 
   return (
