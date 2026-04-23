@@ -1,0 +1,19 @@
+{
+  "serenibrain_ble": {
+    "address": "CB:68:60:DA:76:05",
+    "device_name": "TH21A_CB6860DA7605",
+    "notify_char_uuid": "8653000b-43e6-47b7-9cb0-5fc21d4ae340",
+    "write_char_uuid": "8653000c-43e6-47b7-9cb0-5fc21d4ae340",
+    "service_uuid_hint": "8653000a-43e6-47b7-9cb0-5fc21d4ae340",
+    "start_hex": "A10001",
+    "keepalive_hex": "",
+    "keepalive_interval_s": 2.0,
+    "channels": 4,
+    "sample_rate": 128.0,
+    "format": "i16le",
+    "scale": 1.0,
+    "reconnect_seconds": 6,
+    "scan_timeout": 8,
+    "scan_retries": 3
+  }
+}

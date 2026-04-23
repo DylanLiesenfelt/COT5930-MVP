@@ -177,6 +177,15 @@ class PhysicalSensor(Sensor):
         """
         ...
 
+    def preflight(self):
+        """
+        Optional readiness hook executed by the launcher before start().
+
+        Use this for operations like hardware discovery, address resolution,
+        credential checks, or warmup that should happen before connect().
+        """
+        pass
+
     @abstractmethod
     def read_sample(self) -> list[float] | None:
         """

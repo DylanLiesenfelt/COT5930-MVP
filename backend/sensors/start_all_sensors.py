@@ -85,6 +85,10 @@ def discover_sensors() -> tuple[list, list, list]:
 
                 if not (isinstance(obj, type) and issubclass(obj, base_class)):
                     continue
+                # Only discover classes declared in this module.
+                # This avoids picking up imported base classes.
+                if obj.__module__ != mod.__name__:
+                    continue
                 if obj is base_class or obj in seen_classes:
                     continue
                 # Skip abstract base classes from sensor.py itself
@@ -137,6 +141,16 @@ def main():
     # Separate derived from the rest so we can start them after a short delay
     non_derived = [s for s in sensors if not isinstance(s, DerivedSensor)]
     derived     = [s for s in sensors if     isinstance(s, DerivedSensor)]
+
+    # Preflight physical sensors (e.g., BLE discovery) before starting threads.
+    physical = [s for s in non_derived if isinstance(s, PhysicalSensor)]
+    if physical:
+        print(f"Preflighting {len(physical)} physical sensor(s)...\n")
+        for sensor in physical:
+            try:
+                sensor.preflight()
+            except Exception as e:
+                print(f"  [!] Preflight warning for {sensor.name}: {e}")
 
     print(f"\nStarting {len(non_derived)} source sensor(s)...\n")
     started = []

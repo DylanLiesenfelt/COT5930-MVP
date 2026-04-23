@@ -11,6 +11,9 @@
 
 
 import logging
+import subprocess
+import sys
+import json
 
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Query
@@ -21,11 +24,13 @@ from machine_learning.router import router as ml_router
 import os
 import pandas as pd
 
-
+SENSOR_CONFIG_PATH = os.path.join(os.path.dirname(__file__), "sensors", "sensor_config.json")
 STORAGE_PATH = './data/CSV'
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s  %(message)s")
 session = SessionManager()
+
+_sensor_proc: subprocess.Popen | None = None
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -98,6 +103,71 @@ def start_recording():
 def stop_recording():
     session.stop_recording()
     return {"recording": False}
+
+# ════════════════════════════════════════════════════════════════════
+# SENSORS
+# ════════════════════════════════════════════════════════════════════
+
+@app.get("/sensors/status")
+def sensors_status():
+    global _sensor_proc
+    running = _sensor_proc is not None and _sensor_proc.poll() is None
+    return {"running": running}
+
+
+@app.post("/sensors/start")
+def start_sensors():
+    global _sensor_proc
+    if _sensor_proc is not None and _sensor_proc.poll() is None:
+        return {"ok": True, "status": "already_running"}
+
+    script = os.path.join(os.path.dirname(__file__), "sensors", "start_all_sensors.py")
+    _sensor_proc = subprocess.Popen(
+        [sys.executable, script],
+        cwd=os.path.dirname(__file__),
+        env={**os.environ, "PYTHONPATH": os.path.dirname(__file__)},
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+    )
+    return {"ok": True, "status": "started", "pid": _sensor_proc.pid}
+
+
+@app.post("/sensors/stop")
+def stop_sensors():
+    global _sensor_proc
+    if _sensor_proc is None or _sensor_proc.poll() is not None:
+        _sensor_proc = None
+        return {"ok": True, "status": "not_running"}
+    _sensor_proc.terminate()
+    try:
+        _sensor_proc.wait(timeout=5)
+    except subprocess.TimeoutExpired:
+        _sensor_proc.kill()
+    _sensor_proc = None
+    return {"ok": True, "status": "stopped"}
+
+
+@app.get("/sensors/config")
+def get_sensor_config():
+    try:
+        with open(SENSOR_CONFIG_PATH, "r") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return {}
+
+
+@app.put("/sensors/config")
+def update_sensor_config(body: dict):
+    try:
+        with open(SENSOR_CONFIG_PATH, "r") as f:
+            current = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        current = {}
+    current.update(body)
+    with open(SENSOR_CONFIG_PATH, "w") as f:
+        json.dump(current, f, indent=2)
+    return current
+
 
 # ════════════════════════════════════════════════════════════════════
 # WEBSOCKET
