@@ -208,6 +208,26 @@ class PhysicalSensor(Sensor):
         self.disconnect()
 
 
+@dataclass
+class USBPhysicalSensor(PhysicalSensor):
+    """
+    Standard base for USB/serial-backed physical sensors.
+
+    Subclasses should implement connect/read_sample/disconnect with a USB transport
+    (serial, HID, vendor USB SDK, etc).
+    """
+
+
+@dataclass
+class BluetoothPhysicalSensor(PhysicalSensor):
+    """
+    Standard base for Bluetooth/BLE-backed physical sensors.
+
+    Subclasses should implement connect/read_sample/disconnect using Bluetooth
+    transports (BLE notifications, Classic BT sockets, vendor SDKs, etc).
+    """
+
+
 # ════════════════════════════════════════════════════════════════════
 # DERIVED SENSOR - FOR COMPUTED METRICS THAT DERIVE FROM RAW SENSORS
 # ════════════════════════════════════════════════════════════════════

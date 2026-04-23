@@ -12,7 +12,7 @@ Arduino sketch expected:
 import serial
 import serial.tools.list_ports
 from dataclasses import dataclass, field
-from sensors.sensor import PhysicalSensor
+from sensors.sensor import USBPhysicalSensor
 
 
 def find_arduino_port() -> str | None:
@@ -28,7 +28,7 @@ def find_arduino_port() -> str | None:
 
 
 @dataclass
-class ArduinoPotentiometer(PhysicalSensor):
+class ArduinoPotentiometer(USBPhysicalSensor):
     """
     Reads a single potentiometer channel from an Arduino over USB serial.
 

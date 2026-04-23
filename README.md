@@ -145,7 +145,8 @@ echo/
 ├── docs/
 │   └── sensors/
 │       ├── ADDING SIMPLE SENSORS.md
-│       └── ADDING PHYSICAL SENSORS.md
+│       ├── ADDING USB SENSORS.md
+│       └── ADDING BLUETOOTH SENSORS.md
 ├── main.js                            # Electron main process
 ├── preload.cjs                        # Electron preload
 ├── vite.config.js
@@ -242,7 +243,9 @@ ECHO uses a class hierarchy to treat all data sources uniformly as LSL streams:
 | Type | Purpose | Example |
 |------|---------|---------|
 | **DummySensor** | Fake data for testing | `FakeECG`, `FakeEEG`, `HiLowSensor`, `TimerSignal` |
-| **PhysicalSensor** | Wraps non-LSL hardware (serial, BLE, TCP) | `ArduinoPotentiometer` |
+| **USBPhysicalSensor** | Standard base for USB/serial physical devices | `ArduinoPotentiometer` |
+| **BluetoothPhysicalSensor** | Standard base for Bluetooth/BLE physical devices | `SereniBrainBLE` |
+| **PhysicalSensor** | Shared parent class for all physical hardware wrappers | *(base class only)* |
 | **DerivedSensor** | Computes metrics from other streams | `AlphaBandPower` |
 | **MLSensor** | Applies pre-trained models to buffers | *(planned)* |
 
@@ -274,7 +277,8 @@ See the guides in `docs/sensors/` for how to add your own.
 | Document | Description |
 |----------|-------------|
 | [Adding Simple Sensors](docs/sensors/ADDING%20SIMPLE%20SENSORS.md) | Guide for dummy and derived sensors |
-| [Adding Physical Sensors](docs/sensors/ADDING%20PHYSICAL%20SENSORS.md) | Guide for wrapping real hardware |
+| [Adding USB Sensors](docs/sensors/ADDING%20USB%20SENSORS.md) | Quickstart for USB/serial physical sensors |
+| [Adding Bluetooth Sensors](docs/sensors/ADDING%20BLUETOOTH%20SENSORS.md) | Quickstart for Bluetooth/BLE physical sensors |
 
 ---
 
