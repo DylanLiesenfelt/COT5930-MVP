@@ -248,12 +248,13 @@ class SereniBrainBLE(BluetoothPhysicalSensor):
             self._client = None
 
     def connect(self):
-        self._loop_ready.clear()
-        self._loop_thread = threading.Thread(target=self._run_event_loop, daemon=True)
-        self._loop_thread.start()
-
-        if not self._loop_ready.wait(timeout=3):
-            raise RuntimeError("Failed to start BLE event loop")
+        # Start the async event loop only once; safe to call again on retry.
+        if self._loop is None or not self._loop.is_running():
+            self._loop_ready.clear()
+            self._loop_thread = threading.Thread(target=self._run_event_loop, daemon=True)
+            self._loop_thread.start()
+            if not self._loop_ready.wait(timeout=3):
+                raise RuntimeError("Failed to start BLE event loop")
 
         self._run_coro(self._connect_async())
         self._last_rx = time.monotonic()

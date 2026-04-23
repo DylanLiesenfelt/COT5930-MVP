@@ -225,7 +225,54 @@ class BluetoothPhysicalSensor(PhysicalSensor):
 
     Subclasses should implement connect/read_sample/disconnect using Bluetooth
     transports (BLE notifications, Classic BT sockets, vendor SDKs, etc).
+
+    Unlike USB sensors, Bluetooth devices may be powered off or out of range at
+    startup.  Connection is deferred to the background loop so a missing device
+    never blocks start_all_sensors or raises a hard startup failure.  The thread
+    retries connect() every bt_connect_retry_interval seconds until it succeeds,
+    then reads samples normally.
     """
+    bt_connect_retry_interval: float = 5.0
+
+    _bt_connected: bool = field(init=False, default=False)
+    _bt_last_attempt: float = field(init=False, default=0.0)
+
+    def _setup(self):
+        # Connection is intentionally deferred to the background thread so that
+        # a missing or out-of-range device never blocks sensor startup.
+        print(f"[{self.name}] Bluetooth sensor starting — will connect in background...")
+
+    def _loop_body(self):
+        if not self._bt_connected:
+            self._attempt_bt_connect()
+            return
+
+        sample = self.read_sample()
+        if sample is not None:
+            self.push(sample)
+        if self.sample_rate > 0:
+            time.sleep(1.0 / self.sample_rate)
+
+    def _attempt_bt_connect(self):
+        now = time.monotonic()
+        if (now - self._bt_last_attempt) < self.bt_connect_retry_interval:
+            time.sleep(0.5)
+            return
+
+        self._bt_last_attempt = now
+        print(f"[{self.name}] Attempting Bluetooth connection...")
+        try:
+            self.connect()
+            self._bt_connected = True
+        except Exception as e:
+            print(
+                f"[{self.name}] Bluetooth connection failed ({e}); "
+                f"retrying in {self.bt_connect_retry_interval:.0f}s"
+            )
+
+    def _teardown(self):
+        if self._bt_connected:
+            self.disconnect()
 
 
 # ════════════════════════════════════════════════════════════════════
